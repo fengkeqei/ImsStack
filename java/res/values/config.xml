@@ -17,5 +17,9 @@
 <resources>
     <bool name="config_imsstack_emergency_mmtel_feature">true</bool>
     <bool name="config_imsstack_rcs_feature">true</bool>
-    <bool name="config_imsstack_dedicated_bearer_qos_supported">true</bool>
+    <!-- Round 71: false per the ImsStack README device-constraint rule. The
+     Samsung RIL never reports dedicated-bearer QoS events, so precondition
+     resource reservation times out and every MO call dies with
+     CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED (145). -->
+    <bool name="config_imsstack_dedicated_bearer_qos_supported">false</bool>
 </resources>

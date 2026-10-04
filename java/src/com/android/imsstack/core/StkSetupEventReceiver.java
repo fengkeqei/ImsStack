@@ -30,6 +30,10 @@ import com.android.imsstack.util.ImsLog;
  * Receives and processes stk setup event list intent.
  */
 public class StkSetupEventReceiver extends BroadcastReceiver {
+
+    // Android 17 telephony constant (not present on Android 15).
+    private static final String EXTRA_SETUP_EVENT_LIST =
+            "android.telephony.extra.SETUP_EVENT_LIST";
     @Override
     public void onReceive(Context context, Intent intent) {
         ImsLog.d("onReceive: " + intent);
@@ -41,7 +45,8 @@ public class StkSetupEventReceiver extends BroadcastReceiver {
 
         UsatInterface usat = (sim != null) ? sim.getUsatInterface() : null;
         if (usat != null) {
-            int[] setupEventList = intent.getIntArrayExtra(TelephonyManager.EXTRA_SETUP_EVENT_LIST);
+            // Round 71: constant absent on Android 15 — canonical value inline.
+            int[] setupEventList = intent.getIntArrayExtra(EXTRA_SETUP_EVENT_LIST);
             if (setupEventList != null) {
                 usat.updateSetupEventList(setupEventList);
             }

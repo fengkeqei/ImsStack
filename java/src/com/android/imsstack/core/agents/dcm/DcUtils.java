@@ -155,18 +155,22 @@ public class DcUtils implements IDcUtils {
         NetworkRegistrationInfo nri = getNetworkRegistrationInfo(getServiceState());
         CellIdentity ci = (nri != null) ? nri.getCellIdentity() : null;
 
-        final String plmn = switch (ci) {
-            case CellIdentityGsm gsm -> gsm.getMobileNetworkOperator();
-            case CellIdentityWcdma wcdma -> wcdma.getMobileNetworkOperator();
-            case CellIdentityLte lte -> lte.getMobileNetworkOperator();
-            case CellIdentityNr nr -> {
-                if (TextUtils.isEmpty(nr.getMccString()) || TextUtils.isEmpty(nr.getMncString())) {
-                    yield "";
-                }
-                yield nr.getMccString() + nr.getMncString();
+        // Round 71: Java 21 pattern switch rewritten for the -source 17 build.
+        String plmn = "";
+        if (ci instanceof CellIdentityGsm) {
+            plmn = ((CellIdentityGsm) ci).getMobileNetworkOperator();
+        } else if (ci instanceof CellIdentityWcdma) {
+            plmn = ((CellIdentityWcdma) ci).getMobileNetworkOperator();
+        } else if (ci instanceof CellIdentityLte) {
+            plmn = ((CellIdentityLte) ci).getMobileNetworkOperator();
+        } else if (ci instanceof CellIdentityNr) {
+            CellIdentityNr nr = (CellIdentityNr) ci;
+            if (TextUtils.isEmpty(nr.getMccString()) || TextUtils.isEmpty(nr.getMncString())) {
+                plmn = "";
+            } else {
+                plmn = nr.getMccString() + nr.getMncString();
             }
-            case null, default -> "";
-        };
+        }
 
         return plmn != null ? plmn : "";
     }

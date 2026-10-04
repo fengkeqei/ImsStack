@@ -290,7 +290,20 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
             }
         };
 
-        tm.requestUiccIari(ExecutorHolder.sExecutor, callback);
+        // Round 71: requestUiccIari is an Android 17 API — reflect and degrade
+        // to an empty set on Android 15 (the caller already treats empty as
+        // "no IARI").
+        try {
+            java.lang.reflect.Method m = TelephonyManager.class.getMethod(
+                    "requestUiccIari",
+                    java.util.concurrent.Executor.class,
+                    Class.forName("android.os.OutcomeReceiver"));
+            m.invoke(tm, ExecutorHolder.sExecutor, callback);
+        } catch (NoSuchMethodException e) {
+            future.complete(Collections.emptySet());
+        } catch (Exception e) {
+            future.complete(Collections.emptySet());
+        }
 
         try {
             return future.get(1, TimeUnit.SECONDS);

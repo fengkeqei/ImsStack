@@ -24,6 +24,8 @@ import android.telephony.BarringInfo;
 import android.telephony.BarringInfo.BarringServiceInfo;
 import android.telephony.CellIdentity;
 import android.telephony.CellIdentityNr;
+import android.telephony.NetworkRegistrationInfo;
+import android.telephony.ServiceState;
 import android.telephony.TelephonyCallback;
 import android.telephony.ims.feature.ConnectionFailureInfo;
 import android.telephony.ims.feature.ImsTrafficSessionCallback;
@@ -385,7 +387,16 @@ public class ImsRadioAgent implements ImsRadioInterface {
 
     @VisibleForTesting
     protected void handleBarringInfo(BarringInfo barringInfo) {
-        CellIdentity ci = barringInfo.getCellIdentity();
+        // Round 71: Android 15 BarringInfo lacks getCellIdentity(); read the
+        // cell identity from the current ServiceState instead.
+        TelephonyManagerProxy tmpProxy = AppContext.getTelephonyManagerProxy(mSlotId);
+        ServiceState ss = (tmpProxy != null) ? tmpProxy.getServiceState(mSlotId) : null;
+        NetworkRegistrationInfo nri = (ss != null)
+                ? ss.getNetworkRegistrationInfo(
+                        NetworkRegistrationInfo.DOMAIN_PS,
+                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN)
+                : null;
+        CellIdentity ci = (nri != null) ? nri.getCellIdentity() : null;
         if (ci instanceof CellIdentityNr) {
             ImsLog.i(this, mSlotId, "handleBarringInfo: Ignoring, cellType=NR");
             return;

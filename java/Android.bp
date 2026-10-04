@@ -46,14 +46,8 @@ android_library {
     ],
     srcs: [
         ":imsstack-java-common-srcs",
-    ] + select(soong_config_variable("imsstack_namespace", "use_android16_telephony_compat"), {
-        true: [
-            "src/com/android/imsstack/core/agents/DomainSelectionEmergencyModeMonitorCompat.java",
-        ],
-        default: [
-            "src/com/android/imsstack/core/agents/DomainSelectionEmergencyModeMonitor.java",
-        ],
-    }),
+        "src/com/android/imsstack/core/agents/DomainSelectionEmergencyModeMonitorCompat.java",
+    ],
     aidl: {
         include_dirs: [
             "frameworks/native/aidl/gui",
